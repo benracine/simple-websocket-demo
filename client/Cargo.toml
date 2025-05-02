@@ -1,0 +1,14 @@
+[package]
+name = "client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Pull these from the workspace to keep versions consistent
+futures-util = "0.3.31"
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+futures.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+url = "2.5.4"

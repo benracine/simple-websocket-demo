@@ -1,0 +1,27 @@
+[workspace]
+# All the crates that make up this demo project
+members = [
+  "publisher",   # WebSocket server component
+  "client",      # WebSocket client component
+  "demo-runner", # Binary that runs both client and publisher
+]
+
+# Enable the version 2 feature resolver for cleaner dependency resolution
+resolver = "2"
+
+[workspace.dependencies]
+# Asynchronous runtime
+tokio = { version = "1.37.0", features = ["full"] }
+
+# WebSocket support over Tokio
+tokio-tungstenite = "0.26.2"
+
+# Future combinators, streams, sinks
+futures = "0.3.30"
+
+# For defining structured error types in each lib crate
+thiserror = "2.0.12"
+
+# Structured, async-aware logging
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"

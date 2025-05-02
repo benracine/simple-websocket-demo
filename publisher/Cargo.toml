@@ -1,0 +1,13 @@
+[package]
+name = "publisher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+futures.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+futures-util = "0.3.31"
+bytes = "1.10.1"
