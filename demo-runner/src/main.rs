@@ -5,9 +5,20 @@ use std::time::Duration;
 // External crate imports
 use client::run_client;
 use publisher::{run_server, ServerConfig};
+use thiserror::Error;
 use tokio::{signal, time::sleep};
 use tracing::{error, info, warn};
 use tracing_subscriber::FmtSubscriber;
+use tungstenite::Error as WsError;
+
+// thiserror keeps clear error handling
+#[derive(Error, Debug)]
+pub enum DemoError {
+    #[error("Failed to parse address: {0}")]
+    AddressParseError(#[from] std::net::AddrParseError),
+    #[error("Failed to connect to server: {0}")]
+    ConnectionError(#[from] WsError),
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -217,12 +217,11 @@ async fn handle_connection(
     });
 
     // Handle incoming messages
-    let mut last_activity = tokio::time::Instant::now();
     let msg_tx_clone = msg_tx.clone();
 
     // Main message processing loop
     while let Some(msg) = ws_receiver.next().await {
-        last_activity = tokio::time::Instant::now();
+        let last_activity = tokio::time::Instant::now();
 
         match msg {
             Ok(Message::Text(text)) => {

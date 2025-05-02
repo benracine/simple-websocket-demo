@@ -5,7 +5,9 @@ edition = "2021"
 
 [dependencies]
 # Workspace-shared dependencies
+thiserror.workspace = true
 tokio.workspace = true
+tungstenite.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 
