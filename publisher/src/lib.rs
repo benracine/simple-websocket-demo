@@ -168,11 +168,12 @@ async fn handle_connection(
             interval.tick().await;
             counter += 1;
 
-            if let Err(_) = msg_tx_clone
+            if msg_tx_clone
                 .send(Message::Text(
                     format!("Periodic message #{}", counter).into(),
                 ))
                 .await
+                .is_err()
             {
                 break;
             }
@@ -187,7 +188,11 @@ async fn handle_connection(
 
             loop {
                 interval.tick().await;
-                if let Err(_) = msg_tx_clone.send(Message::Ping(Bytes::new())).await {
+                if msg_tx_clone
+                    .send(Message::Ping(Bytes::new()))
+                    .await
+                    .is_err()
+                {
                     break;
                 }
             }
@@ -212,27 +217,29 @@ async fn handle_connection(
     });
 
     // Handle incoming messages
+    let mut last_activity = tokio::time::Instant::now();
     let msg_tx_clone = msg_tx.clone();
 
     // Main message processing loop
     while let Some(msg) = ws_receiver.next().await {
-        let last_activity = tokio::time::Instant::now();
+        last_activity = tokio::time::Instant::now();
 
         match msg {
             Ok(Message::Text(text)) => {
                 info!("Received from {}: {}", peer_addr, text);
 
                 // Echo the message back
-                if let Err(_) = msg_tx_clone
+                if msg_tx_clone
                     .send(Message::Text(format!("echo: {}", text).into()))
                     .await
+                    .is_err()
                 {
                     break;
                 }
             }
             Ok(Message::Ping(data)) => {
                 debug!("Received ping from {}", peer_addr);
-                if let Err(_) = msg_tx_clone.send(Message::Pong(data)).await {
+                if msg_tx_clone.send(Message::Pong(data)).await.is_err() {
                     break;
                 }
             }

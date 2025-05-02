@@ -1,21 +1,31 @@
+// Standard library imports
 use std::net::SocketAddr;
 use std::time::Duration;
 
+// External crate imports
 use client::run_client;
 use publisher::{run_server, ServerConfig};
-use tokio::time::sleep;
-use tracing::{error, info};
+use tokio::{signal, time::sleep};
+use tracing::{error, info, warn};
 use tracing_subscriber::FmtSubscriber;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize logging
     FmtSubscriber::builder()
         .with_max_level(tracing::Level::INFO)
         .with_target(false)
         .init();
 
-    let addr: SocketAddr = "127.0.0.1:9001".parse().expect("Invalid address");
+    let addr: SocketAddr = match "127.0.0.1:9001".parse() {
+        Ok(addr) => addr,
+        Err(e) => {
+            error!("Failed to parse address: {}", e);
+            return Err(e.into());
+        }
+    };
+
+    info!("Starting WebSocket demo on {}", addr);
 
     // Create custom server configuration
     let config = ServerConfig {
@@ -26,7 +36,7 @@ async fn main() {
     };
 
     // Start WebSocket server with configuration
-    tokio::spawn(async move {
+    let server_handle = tokio::spawn(async move {
         if let Err(e) = run_server(addr, Some(config)).await {
             error!("Server error: {}", e);
         }
@@ -36,10 +46,21 @@ async fn main() {
     sleep(Duration::from_millis(500)).await;
 
     // Connect client
+    info!("Connecting client to server...");
     if let Err(e) = run_client("ws://127.0.0.1:9001", "hello from client").await {
         error!("Client error: {}", e);
     }
 
-    // Gracefully exit
+    // Wait for Ctrl-C or server shutdown
+    tokio::select! {
+        _ = signal::ctrl_c() => {
+            info!("Received Ctrl-C, shutting down...");
+        }
+        _ = server_handle => {
+            warn!("Server task completed unexpectedly");
+        }
+    }
+
     info!("Demo complete");
+    Ok(())
 }
