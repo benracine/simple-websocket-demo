@@ -12,5 +12,5 @@ The client is a simple WebSocket client that connects to the server and prints t
 1. Run the server:
 
 ```bash
-cargo run --bin socket-server
+cargo run --bin demo-runner
 ```
